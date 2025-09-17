@@ -423,11 +423,17 @@
             <div class="success-message" id="successMessage">
                 <h3>Thank you for your submission!</h3>
                 <p>We've received your information and will be in touch soon.</p>
-                <div class="download-links">
-                    <p>As promised, here are your files:</p>
-                    <a href="#" class="download-link" onclick="downloadFile('sample-document.pdf')">Download PDF Guide</a>
-                    <a href="#" class="download-link" onclick="downloadFile('sample-images.zip')">Download Image Pack</a>
-                    <a href="#" class="download-link" onclick="downloadFile('bonus-content.docx')">Download Bonus Content</a>
+                <div class="email-notification" style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h4 style="color: #0066cc; margin-bottom: 10px;">📧 Check Your Email!</h4>
+                    <p style="margin-bottom: 0; color: #333;">We've sent your requested documents directly to your email address. Please check your inbox (and spam folder) for:</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #555;">
+                        <li>📄 PDF Guide</li>
+                        <li>🖼️ Image Pack</li>
+                        <li>📋 Bonus Content</li>
+                    </ul>
+                    <p style="font-size: 14px; color: #666; margin-top: 15px; margin-bottom: 0;">
+                        <strong>Note:</strong> If you don't see the email within 5 minutes, please check your spam/junk folder.
+                    </p>
                 </div>
             </div>
         </section>
@@ -441,7 +447,7 @@
         </div>
     </div>
 
-    <!-- EmailJS SDK -->
+    <!-- EmailJS SDK - MUST be loaded before our JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
 
@@ -538,10 +544,21 @@
             closeBtn.onmouseout = () => closeBtn.style.color = 'white';
         }
 
-        // Initialize EmailJS with your public key
-        (function(){
-            emailjs.init("v9YO--vm1DAXwkMnb"); // Replace with your actual EmailJS public key
-        })();
+        // Test if EmailJS is loaded
+        function testEmailJS() {
+            if (typeof emailjs !== 'undefined') {
+                console.log('✅ EmailJS loaded successfully!');
+                return true;
+            } else {
+                console.error('❌ EmailJS failed to load');
+                return false;
+            }
+        }
+
+        // Initialize EmailJS with your public key - Updated syntax
+        emailjs.init({
+            publicKey: "v9YO--vm1DAXwkMnb", // Replace with your actual EmailJS public key
+        });
 
         // Photo gallery functionality
         function openModal(imageSrc) {
