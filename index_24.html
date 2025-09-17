@@ -342,16 +342,16 @@
 <body>
     <div class="container">
         <header>
-            <h1>BEAUTIFUL NEW ZEALAND</h1>
-            <p class="subtitle">The Perfect Getaway</p>
+            <h1>My Photo Gallery</h1>
+            <p class="subtitle">Capturing moments, sharing memories</p>
         </header>
 
         <!-- Video Section -->
         <section class="video-section">
-            <h2>Drone Flyover showing the land offered for sale</h2>
+            <h2>Featured Video</h2>
             <div class="video-container" id="videoContainer">
                 <!-- Custom thumbnail with play button -->
-                <div class="video-thumbnail" onclick="playVideo('videos/Flyover_20250208_Video.mkv')" style="position: relative; cursor: pointer; border-radius: 10px; overflow: hidden;">
+                <div class="video-thumbnail" onclick="playVideo('videos/your-video.mp4')" style="position: relative; cursor: pointer; border-radius: 10px; overflow: hidden;">
                     <img src="images/video-thumbnail.jpg" alt="Play Video" style="width: 100%; height: 100%; object-fit: cover; display: block;">
                     <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
                                 background: rgba(0,0,0,0.8); border-radius: 50%; width: 80px; height: 80px; 
@@ -364,7 +364,7 @@
                                 background: rgba(0,0,0,0); transition: background 0.3s ease;"></div>
                 </div>
             </div>
-            <p style="text-align: center; color: #666; margin-top: 15px;">Click play button to watch the Flyover</p>
+            <p style="text-align: center; color: #666; margin-top: 15px;">Click to play video</p>
         </section>
 
         <!-- Photo Gallery -->
@@ -389,12 +389,6 @@
                 </div>
                 <div class="photo-thumbnail" onclick="openModal('images/full/photo6.jpg')">
                     <img src="images/thumbnails/photo6.jpg" alt="Photo 6 Description">
-                </div>
-                <div class="photo-thumbnail" onclick="openModal('images/full/photo7.jpg')">
-                    <img src="images/thumbnails/photo7.jpg" alt="Photo 7 Description">
-                </div>
-                <div class="photo-thumbnail" onclick="openModal('images/full/photo8.jpg')">
-                    <img src="images/thumbnails/photo8.jpg" alt="Photo 8 Description">
                 </div>
                 <!-- Add more photos by copying the pattern above -->
             </div>
@@ -427,7 +421,9 @@
                     <h4 style="color: #0066cc; margin-bottom: 10px;">📧 Check Your Email!</h4>
                     <p style="margin-bottom: 0; color: #333;">We've sent your requested documents directly to your email address. Please check your inbox (and spam folder) for:</p>
                     <ul style="margin: 10px 0; padding-left: 20px; color: #555;">
-                        <li>📄 Certificate_of_Title.pdf</li>
+                        <li>📄 PDF Guide</li>
+                        <li>🖼️ Image Pack</li>
+                        <li>📋 Bonus Content</li>
                     </ul>
                     <p style="font-size: 14px; color: #666; margin-top: 15px; margin-bottom: 0;">
                         <strong>Note:</strong> If you don't see the email within 5 minutes, please check your spam/junk folder.
@@ -448,7 +444,6 @@
     <!-- EmailJS SDK - MUST be loaded before our JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
-
     <script>
         // Video popup functionality - Self-hosted version
         function playVideo(videoSrc) {
@@ -555,7 +550,7 @@
 
         // Initialize EmailJS with your public key - Updated syntax
         emailjs.init({
-            publicKey: "v9YO--vm1DAXwkMnb", // Replace with your actual EmailJS public key
+            publicKey: "YOUR_PUBLIC_KEY_HERE", // Replace with your actual EmailJS public key
         });
 
         // Photo gallery functionality
@@ -604,20 +599,44 @@
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Prepare email parameters
-            const templateParams = {
+            // Send notification email to you (the site owner)
+            const ownerTemplateParams = {
                 from_name: name,
                 from_email: email,
                 phone_number: phone || 'Not provided',
                 submission_date: new Date().toLocaleString(),
-                to_email: 'terryroswell@yahoo.com' // Replace with your email
-                
+                to_email: 'your-email@example.com' // Replace with your email
             };
 
-            // Send email using EmailJS
-            emailjs.send('service_tlscaul', 'template_5b8vifs', templateParams)
+            // Send welcome email with documents to the user
+            const userTemplateParams = {
+                to_name: name,
+                to_email: email,
+                from_name: 'Your Business Name', // Replace with your actual business name
+                submission_date: new Date().toLocaleString(),
+                // Replace these URLs with your actual GitHub document URLs
+                document_links: `
+                <p><strong>📄 <a href="https://github.com/yourusername/yourrepo/raw/main/documents/guide.pdf" style="color: #0066cc; text-decoration: none;">Download PDF Guide</a></strong></p>
+                
+                <p><strong>🖼️ <a href="https://github.com/yourusername/yourrepo/raw/main/documents/images.zip" style="color: #0066cc; text-decoration: none;">Download Image Pack</a></strong></p>
+                
+                <p><strong>📋 <a href="https://github.com/yourusername/yourrepo/raw/main/documents/bonus.docx" style="color: #0066cc; text-decoration: none;">Download Bonus Content</a></strong></p>
+                `
+            };
+
+            console.log('Sending notification email...');
+
+            // First, send notification email to you
+            emailjs.send('YOUR_SERVICE_ID', 'YOUR_NOTIFICATION_TEMPLATE_ID', ownerTemplateParams)
                 .then(function(response) {
-                    console.log('Email sent successfully:', response);
+                    console.log('✅ Notification email sent:', response);
+                    
+                    // Then send welcome email with documents to user
+                    console.log('Sending welcome email with documents...');
+                    return emailjs.send('YOUR_SERVICE_ID', 'YOUR_USER_TEMPLATE_ID', userTemplateParams);
+                })
+                .then(function(response) {
+                    console.log('✅ Welcome email sent to user:', response);
                     
                     // Show success message and hide form
                     document.getElementById('contactForm').style.display = 'none';
@@ -629,10 +648,15 @@
                     });
                 })
                 .catch(function(error) {
-                    console.error('Email sending failed:', error);
+                    console.error('❌ Email sending failed:', error);
                     
-                    // Show error message
-                    alert('Sorry, there was an error sending your message. Please try again or contact us directly.');
+                    let errorMessage = 'Sorry, there was an error processing your request. ';
+                    if (error.text) {
+                        errorMessage += 'Error: ' + error.text;
+                    }
+                    errorMessage += ' Please try again or contact us directly.';
+                    
+                    alert(errorMessage);
                     
                     // Reset button
                     submitBtn.textContent = originalText;

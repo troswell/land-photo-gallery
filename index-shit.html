@@ -604,13 +604,24 @@
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Prepare email parameters
-            const templateParams = {
+            // Send notification email to you (the site owner)
+            const ownerTemplateParams = {
                 from_name: name,
                 from_email: email,
                 phone_number: phone || 'Not provided',
                 submission_date: new Date().toLocaleString(),
                 to_email: 'terryroswell@yahoo.com' // Replace with your email
+            };
+
+            // Send welcome email with documents to the user
+            const userTemplateParams = {
+                to_name: name,
+                to_email: email,
+                from_name: 'Terry Roswell', // Replace with your actual business name
+                submission_date: new Date().toLocaleString(),
+                // Replace these URLs with your actual GitHub document URLs
+                document_links: `
+                <p><strong>📄 <a href="https://github.com/troswell/land-photo-gallery/raw/main/documents/Certificate_of_Title.pdf" style="color: #0066cc; text-decoration: none;">Download PDF Guide</a></strong></p>
                 
             };
 
