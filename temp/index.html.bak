@@ -268,6 +268,61 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
+        .video-thumbnail:hover .play-button {
+            background: rgba(255,255,255,0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-thumbnail:hover .play-button div {
+            border-left-color: #333;
+        }
+
+        .video-thumbnail:hover .video-overlay {
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* Video Modal Styles */
+        .video-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .video-modal-content {
+            position: relative;
+            margin: 5% auto;
+            width: 90%;
+            max-width: 900px;
+            height: 70vh;
+        }
+
+        .video-modal iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .video-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .video-close:hover {
+            color: #667eea;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -287,18 +342,29 @@
 <body>
     <div class="container">
         <header>
-            <h1>My Photo Gallery</h1>
-            <p class="subtitle">Capturing moments, sharing memories</p>
+            <h1>BEAUTIFUL NEW ZEALAND</h1>
+            <p class="subtitle">The Perfect Getaway</p>
         </header>
 
         <!-- Video Section -->
         <section class="video-section">
-            <h2>Featured Video</h2>
-            <div class="video-container">
-                <!-- Replace with your YouTube video ID or use a different video service -->
-                <iframe src="https://www.youtube.com/embed/dQw4w9WgXcQ" frameborder="0" allowfullscreen></iframe>
+            <h2>Drone Flyover showing the land offered for sale</h2>
+            <div class="video-container" id="videoContainer">
+                <!-- Custom thumbnail with play button -->
+                <div class="video-thumbnail" onclick="playVideo('videos/Flyover_20250208_Video.mkv')" style="position: relative; cursor: pointer; border-radius: 10px; overflow: hidden;">
+                    <img src="images/video-thumbnail.jpg" alt="Play Video" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                    <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                background: rgba(0,0,0,0.8); border-radius: 50%; width: 80px; height: 80px; 
+                                display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                        <div style="width: 0; height: 0; border-left: 25px solid white; 
+                                    border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 5px;">
+                        </div>
+                    </div>
+                    <div class="video-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                                background: rgba(0,0,0,0); transition: background 0.3s ease;"></div>
+                </div>
             </div>
-            <p style="text-align: center; color: #666;">Replace the video ID in the iframe src with your own video</p>
+            <p style="text-align: center; color: #666; margin-top: 15px;">Click play button to watch the Flyover</p>
         </section>
 
         <!-- Photo Gallery -->
@@ -323,6 +389,12 @@
                 </div>
                 <div class="photo-thumbnail" onclick="openModal('images/full/photo6.jpg')">
                     <img src="images/thumbnails/photo6.jpg" alt="Photo 6 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo7.jpg')">
+                    <img src="images/thumbnails/photo7.jpg" alt="Photo 7 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo8.jpg')">
+                    <img src="images/thumbnails/photo8.jpg" alt="Photo 8 Description">
                 </div>
                 <!-- Add more photos by copying the pattern above -->
             </div>
@@ -372,10 +444,103 @@
     <!-- EmailJS SDK -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/emailjs-com/3.2.0/email.min.js"></script>
     
+
     <script>
+        // Video popup functionality - Self-hosted version
+        function playVideo(videoSrc) {
+            console.log('Playing video:', videoSrc);
+            
+            // Create modal backdrop
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: block;
+                position: fixed;
+                z-index: 2000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.9);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                position: relative;
+                margin: 5% auto;
+                width: 90%;
+                max-width: 900px;
+                height: 70vh;
+            `;
+            
+            // Create close button
+            const closeBtn = document.createElement('span');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: -40px;
+                right: 0;
+                color: white;
+                font-size: 35px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 2001;
+            `;
+            
+            // Create video element
+            const video = document.createElement('video');
+            video.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border-radius: 10px;
+                background: #000;
+            `;
+            video.controls = true;
+            video.autoplay = true;
+            video.preload = 'metadata';
+            
+            // Add video source
+            const source = document.createElement('source');
+            source.src = videoSrc;
+            source.type = 'video/mp4';
+            video.appendChild(source);
+            
+            // Fallback text
+            video.innerHTML += 'Your browser does not support the video tag.';
+            
+            // Assemble modal
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(video);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close functionality
+            const closeModal = () => {
+                video.pause(); // Stop video when closing
+                document.body.removeChild(modal);
+            };
+            
+            closeBtn.onclick = closeModal;
+            modal.onclick = (e) => e.target === modal && closeModal();
+            
+            // Escape key
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+            
+            // Hover effects
+            closeBtn.onmouseover = () => closeBtn.style.color = '#667eea';
+            closeBtn.onmouseout = () => closeBtn.style.color = 'white';
+        }
+
         // Initialize EmailJS with your public key
         (function(){
-            emailjs.init("YOUR_PUBLIC_KEY"); // Replace with your EmailJS public key
+            emailjs.init("v9YO--vm1DAXwkMnb"); // Replace with your actual EmailJS public key
         })();
 
         // Photo gallery functionality
@@ -418,20 +583,18 @@
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Send email using EmailJS
+            // Prepare email parameters
             const templateParams = {
                 from_name: name,
                 from_email: email,
-                phone_number: phone,
-                message: `New contact form submission:
+                phone_number: phone || 'Not provided',
+                submission_date: new Date().toLocaleString(),
+                to_email: 'terryroswell@yahoo.com' // Replace with your email
                 
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
-Submitted: ${new Date().toLocaleString()}`
             };
 
-            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+            // Send email using EmailJS
+            emailjs.send('service_tlscaul', 'template_5b8vifs', templateParams)
                 .then(function(response) {
                     console.log('Email sent successfully:', response);
                     
