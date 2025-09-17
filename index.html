@@ -588,6 +588,12 @@
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Test if EmailJS is available
+            if (!testEmailJS()) {
+                alert('Email service is not available. Please try again later or contact us directly.');
+                return;
+            }
+            
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
