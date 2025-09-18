@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: 
+                linear-gradient(135deg, rgba(102, 126, 234, 0.5) 0%, rgba(118, 75, 162, 0.5) 100%),
+                url('images/mountain-background.jpg');
+            background-size: cover;
+            background-position: center center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* Video Section */
+        .video-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            margin-bottom: 20px;
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        /* Photo Gallery */
+        .gallery-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .photo-thumbnail {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .photo-thumbnail:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .photo-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .photo-thumbnail:hover img {
+            transform: scale(1.1);
+        }
+
+        /* Modal for enlarged photos */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: relative;
+            margin: 5% auto;
+            padding: 20px;
+            max-width: 90%;
+            max-height: 90%;
+            animation: slideIn 0.3s ease;
+        }
+
+        .modal img {
+            width: 100%;
+            height: auto;
+            max-height: 80vh;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .close {
+            position: absolute;
+            top: 10px;
+            right: 25px;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .close:hover {
+            color: #667eea;
+        }
+
+        /* Contact Form */
+        .contact-section {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .success-message {
+            display: none;
+            background: #d4edda;
+            color: #155724;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .download-links {
+            margin-top: 15px;
+        }
+
+        .download-link {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        .download-link:hover {
+            background: #218838;
+        }
+
+        section h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 2rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .video-thumbnail:hover .play-button {
+            background: rgba(255,255,255,0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-thumbnail:hover .play-button div {
+            border-left-color: #333;
+        }
+
+        .video-thumbnail:hover .video-overlay {
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* Video Modal Styles */
+        .video-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .video-modal-content {
+            position: relative;
+            margin: 5% auto;
+            width: 90%;
+            max-width: 900px;
+            height: 70vh;
+        }
+
+        .video-modal iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .video-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .video-close:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>BEAUTIFUL NEW ZEALAND</h1>
+            <p class="subtitle">The Perfect Getaway</p>
+        </header>
+
+        <!-- Video Section -->
+        <section class="video-section">
+            <h2>Drone Flyover showing the land offered for sale</h2>
+            <div class="video-container" id="videoContainer">
+                <!-- Custom thumbnail with play button -->
+                <div class="video-thumbnail" onclick="playVideo('videos/Flyover_20250208_Video.mkv')" style="position: relative; cursor: pointer; border-radius: 10px; overflow: hidden;">
+                    <img src="images/video-thumbnail.jpg" alt="Play Video" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                    <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                background: rgba(0,0,0,0.8); border-radius: 50%; width: 80px; height: 80px; 
+                                display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                        <div style="width: 0; height: 0; border-left: 25px solid white; 
+                                    border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 5px;">
+                        </div>
+                    </div>
+                    <div class="video-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                                background: rgba(0,0,0,0); transition: background 0.3s ease;"></div>
+                </div>
+            </div>
+            <p style="text-align: center; color: #666; margin-top: 15px;">Click play button to watch the Flyover</p>
+        </section>
+
+        <!-- Photo Gallery -->
+        <section class="gallery-section">
+            <h2>Photo Gallery</h2>
+            <div class="gallery-grid">
+                <!-- Your photos - replace the src paths with your own images -->
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo1.jpg')">
+                    <img src="images/thumbnails/photo1.jpg" alt="Photo 1 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo2.jpg')">
+                    <img src="images/thumbnails/photo2.jpg" alt="Photo 2 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo3.jpg')">
+                    <img src="images/thumbnails/photo3.jpg" alt="Photo 3 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo4.jpg')">
+                    <img src="images/thumbnails/photo4.jpg" alt="Photo 4 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo5.jpg')">
+                    <img src="images/thumbnails/photo5.jpg" alt="Photo 5 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo6.jpg')">
+                    <img src="images/thumbnails/photo6.jpg" alt="Photo 6 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo7.jpg')">
+                    <img src="images/thumbnails/photo7.jpg" alt="Photo 7 Description">
+                </div>
+                <div class="photo-thumbnail" onclick="openModal('images/full/photo8.jpg')">
+                    <img src="images/thumbnails/photo8.jpg" alt="Photo 8 Description">
+                </div>
+                <!-- Add more photos by copying the pattern above -->
+            </div>
+            <p style="text-align: center; color: #666; font-style: italic;">Click on any photo to view it in full size</p>
+        </section>
+
+        <!-- Contact Form -->
+        <section class="contact-section">
+            <h2>Get In Touch</h2>
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Contact Number</label>
+                    <input type="tel" id="phone" name="phone">
+                </div>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
+
+            <div class="success-message" id="successMessage">
+                <h3>Thank you for your submission!</h3>
+                <p>We've received your information and will be in touch soon.</p>
+                <div class="download-links">
+                    <p>As promised, here are your files:</p>
+                    <a href="#" class="download-link" onclick="downloadFile('sample-document.pdf')">Download PDF Guide</a>
+                    <a href="#" class="download-link" onclick="downloadFile('sample-images.zip')">Download Image Pack</a>
+                    <a href="#" class="download-link" onclick="downloadFile('bonus-content.docx')">Download Bonus Content</a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal for enlarged photos -->
+    <div id="photoModal" class="modal">
+        <span class="close">&times;</span>
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="Enlarged photo">
+        </div>
+    </div>
+
+    <!-- EmailJS SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/emailjs-com/3.2.0/email.min.js"></script>
+    
+
+    <script>
+        // Video popup functionality - Self-hosted version
+        function playVideo(videoSrc) {
+            console.log('Playing video:', videoSrc);
+            
+            // Create modal backdrop
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: block;
+                position: fixed;
+                z-index: 2000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.9);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                position: relative;
+                margin: 5% auto;
+                width: 90%;
+                max-width: 900px;
+                height: 70vh;
+            `;
+            
+            // Create close button
+            const closeBtn = document.createElement('span');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: -40px;
+                right: 0;
+                color: white;
+                font-size: 35px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 2001;
+            `;
+            
+            // Create video element
+            const video = document.createElement('video');
+            video.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border-radius: 10px;
+                background: #000;
+            `;
+            video.controls = true;
+            video.autoplay = true;
+            video.preload = 'metadata';
+            
+            // Add video source
+            const source = document.createElement('source');
+            source.src = videoSrc;
+            source.type = 'video/mp4';
+            video.appendChild(source);
+            
+            // Fallback text
+            video.innerHTML += 'Your browser does not support the video tag.';
+            
+            // Assemble modal
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(video);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close functionality
+            const closeModal = () => {
+                video.pause(); // Stop video when closing
+                document.body.removeChild(modal);
+            };
+            
+            closeBtn.onclick = closeModal;
+            modal.onclick = (e) => e.target === modal && closeModal();
+            
+            // Escape key
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+            
+            // Hover effects
+            closeBtn.onmouseover = () => closeBtn.style.color = '#667eea';
+            closeBtn.onmouseout = () => closeBtn.style.color = 'white';
+        }
+
+        // Initialize EmailJS with your public key
+        (function(){
+            emailjs.init("v9YO--vm1DAXwkMnb"); // Replace with your actual EmailJS public key
+        })();
+
+        // Photo gallery functionality
+        function openModal(imageSrc) {
+            const modal = document.getElementById('photoModal');
+            const modalImg = document.getElementById('modalImage');
+            modal.style.display = 'block';
+            modalImg.src = imageSrc;
+        }
+
+        // Close modal when clicking the X or outside the image
+        document.querySelector('.close').onclick = function() {
+            document.getElementById('photoModal').style.display = 'none';
+        }
+
+        document.getElementById('photoModal').onclick = function(event) {
+            if (event.target === this) {
+                this.style.display = 'none';
+            }
+        }
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                document.getElementById('photoModal').style.display = 'none';
+            }
+        });
+
+        // Contact form submission
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+
+            // Show loading state
+            const submitBtn = document.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Sending...';
+            submitBtn.disabled = true;
+
+            // Prepare email parameters
+            const templateParams = {
+                from_name: name,
+                from_email: email,
+                phone_number: phone || 'Not provided',
+                submission_date: new Date().toLocaleString(),
+                to_email: 'terryroswell@yahoo.com' // Replace with your email
+                
+            };
+
+            // Send email using EmailJS
+            emailjs.send('service_tlscaul', 'template_5b8vifs', templateParams)
+                .then(function(response) {
+                    console.log('Email sent successfully:', response);
+                    
+                    // Show success message and hide form
+                    document.getElementById('contactForm').style.display = 'none';
+                    document.getElementById('successMessage').style.display = 'block';
+
+                    // Smooth scroll to success message
+                    document.getElementById('successMessage').scrollIntoView({ 
+                        behavior: 'smooth' 
+                    });
+                })
+                .catch(function(error) {
+                    console.error('Email sending failed:', error);
+                    
+                    // Show error message
+                    alert('Sorry, there was an error sending your message. Please try again or contact us directly.');
+                    
+                    // Reset button
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                });
+        });
+
+        // Download file functionality
+        function downloadFile(filename) {
+            // In a real implementation, you would have actual files hosted on your server
+            // This is a simulation that creates a simple text file
+            let content, mimeType;
+            
+            switch(filename) {
+                case 'sample-document.pdf':
+                    content = 'This would be your PDF content. In a real implementation, you would link to actual PDF files.';
+                    mimeType = 'text/plain';
+                    break;
+                case 'sample-images.zip':
+                    content = 'This would be your image pack. In a real implementation, you would link to actual ZIP files.';
+                    mimeType = 'text/plain';
+                    break;
+                case 'bonus-content.docx':
+                    content = 'This would be your bonus content. In a real implementation, you would link to actual DOCX files.';
+                    mimeType = 'text/plain';
+                    break;
+                default:
+                    content = 'Sample file content';
+                    mimeType = 'text/plain';
+            }
+
+            // Create and download the file
+            const blob = new Blob([content], { type: mimeType });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

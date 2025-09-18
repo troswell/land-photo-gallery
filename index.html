@@ -268,6 +268,61 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
+        .video-thumbnail:hover .play-button {
+            background: rgba(255,255,255,0.9);
+            transform: translate(-50%, -50%) scale(1.1);
+        }
+
+        .video-thumbnail:hover .play-button div {
+            border-left-color: #333;
+        }
+
+        .video-thumbnail:hover .video-overlay {
+            background: rgba(0,0,0,0.1);
+        }
+
+        /* Video Modal Styles */
+        .video-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .video-modal-content {
+            position: relative;
+            margin: 5% auto;
+            width: 90%;
+            max-width: 900px;
+            height: 70vh;
+        }
+
+        .video-modal iframe {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .video-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .video-close:hover {
+            color: #667eea;
+        }
+
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
@@ -289,16 +344,30 @@
         <header>
             <h1>BEAUTIFUL NEW ZEALAND</h1>
             <p class="subtitle">The Perfect Getaway</p>
+            <div class="property-description" style="max-width: 800px; margin: 20px auto; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 15px; backdrop-filter: blur(10px);">
+                <p class="subtitle">New Zealand; renowned as one of the most beautiful countries in the world. On the glorious South Island, barely 30 minutes from Christchurch international airport, is a magnificent 10-acre slice of untouched countryside. Breathtaking views of the Southern Alps. Build your dream home or your idyllic getaway; from a mansion to a log cabin, the choice is yours. Being offered for reluctant sale by the owners, this private slice of New Zealand's south isle is priced at just USD $795,000. Some owner finance possible. Please complete the form down below for more information and to receive a link to the land title</p>
+            </div>
         </header>
 
         <!-- Video Section -->
         <section class="video-section">
             <h2>Drone Flyover showing the land offered for sale</h2>
-            <div class="video-container">
-                <!-- Replace with your YouTube video ID or use a different video service -->
-                <iframe src="https://www.youtube.com/watch?v=a2rQlDWCWlY" frameborder="0" allowfullscreen></iframe>
+            <div class="video-container" id="videoContainer">
+                <!-- Custom thumbnail with play button -->
+                <div class="video-thumbnail" onclick="playVideo('videos/Flyover_20250208_Video.mkv')" style="position: relative; cursor: pointer; border-radius: 10px; overflow: hidden;">
+                    <img src="images/video-thumbnail.jpg" alt="Play Video" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+                    <div class="play-button" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                                background: rgba(0,0,0,0.8); border-radius: 50%; width: 80px; height: 80px; 
+                                display: flex; align-items: center; justify-content: center; transition: all 0.3s ease;">
+                        <div style="width: 0; height: 0; border-left: 25px solid white; 
+                                    border-top: 15px solid transparent; border-bottom: 15px solid transparent; margin-left: 5px;">
+                        </div>
+                    </div>
+                    <div class="video-overlay" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
+                                background: rgba(0,0,0,0); transition: background 0.3s ease;"></div>
+                </div>
             </div>
-            <p style="text-align: center; color: #666;">Replace the video ID in the iframe src with your own video</p>
+            <p style="text-align: center; color: #666; margin-top: 15px;">Click play button to watch the Flyover</p>
         </section>
 
         <!-- Photo Gallery -->
@@ -357,11 +426,15 @@
             <div class="success-message" id="successMessage">
                 <h3>Thank you for your submission!</h3>
                 <p>We've received your information and will be in touch soon.</p>
-                <div class="download-links">
-                    <p>As promised, here are your files:</p>
-                    <a href="#" class="download-link" onclick="downloadFile('sample-document.pdf')">Download PDF Guide</a>
-                    <a href="#" class="download-link" onclick="downloadFile('sample-images.zip')">Download Image Pack</a>
-                    <a href="#" class="download-link" onclick="downloadFile('bonus-content.docx')">Download Bonus Content</a>
+                <div class="email-notification" style="background: #e7f3ff; border: 1px solid #b3d9ff; padding: 20px; border-radius: 10px; margin-top: 20px;">
+                    <h4 style="color: #0066cc; margin-bottom: 10px;">📧 Check Your Email!</h4>
+                    <p style="margin-bottom: 0; color: #333;">We've sent your requested documents directly to your email address. Please check your inbox (and spam folder) for:</p>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #555;">
+                        <li>📄 Certificate_of_Title.pdf</li>
+                    </ul>
+                    <p style="font-size: 14px; color: #666; margin-top: 15px; margin-bottom: 0;">
+                        <strong>Note:</strong> If you don't see the email within 5 minutes, please check your spam/junk folder.
+                    </p>
                 </div>
             </div>
         </section>
@@ -375,7 +448,119 @@
         </div>
     </div>
 
+    <!-- EmailJS SDK - MUST be loaded before our JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+
     <script>
+        // Video popup functionality - Self-hosted version
+        function playVideo(videoSrc) {
+            console.log('Playing video:', videoSrc);
+            
+            // Create modal backdrop
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: block;
+                position: fixed;
+                z-index: 2000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.9);
+                animation: fadeIn 0.3s ease;
+            `;
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                position: relative;
+                margin: 5% auto;
+                width: 90%;
+                max-width: 900px;
+                height: 70vh;
+            `;
+            
+            // Create close button
+            const closeBtn = document.createElement('span');
+            closeBtn.innerHTML = '&times;';
+            closeBtn.style.cssText = `
+                position: absolute;
+                top: -40px;
+                right: 0;
+                color: white;
+                font-size: 35px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 2001;
+            `;
+            
+            // Create video element
+            const video = document.createElement('video');
+            video.style.cssText = `
+                width: 100%;
+                height: 100%;
+                border-radius: 10px;
+                background: #000;
+            `;
+            video.controls = true;
+            video.autoplay = true;
+            video.preload = 'metadata';
+            
+            // Add video source
+            const source = document.createElement('source');
+            source.src = videoSrc;
+            source.type = 'video/mp4';
+            video.appendChild(source);
+            
+            // Fallback text
+            video.innerHTML += 'Your browser does not support the video tag.';
+            
+            // Assemble modal
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(video);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            // Close functionality
+            const closeModal = () => {
+                video.pause(); // Stop video when closing
+                document.body.removeChild(modal);
+            };
+            
+            closeBtn.onclick = closeModal;
+            modal.onclick = (e) => e.target === modal && closeModal();
+            
+            // Escape key
+            const escHandler = (e) => {
+                if (e.key === 'Escape') {
+                    closeModal();
+                    document.removeEventListener('keydown', escHandler);
+                }
+            };
+            document.addEventListener('keydown', escHandler);
+            
+            // Hover effects
+            closeBtn.onmouseover = () => closeBtn.style.color = '#667eea';
+            closeBtn.onmouseout = () => closeBtn.style.color = 'white';
+        }
+
+        // Test if EmailJS is loaded
+        function testEmailJS() {
+            if (typeof emailjs !== 'undefined') {
+                console.log('✅ EmailJS loaded successfully!');
+                return true;
+            } else {
+                console.error('❌ EmailJS failed to load');
+                return false;
+            }
+        }
+
+        // Initialize EmailJS with your public key - Updated syntax
+        emailjs.init({
+            publicKey: "v9YO--vm1DAXwkMnb", // Replace with your actual EmailJS public key
+        });
+
         // Photo gallery functionality
         function openModal(imageSrc) {
             const modal = document.getElementById('photoModal');
@@ -406,6 +591,12 @@
         document.getElementById('contactForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Test if EmailJS is available
+            if (!testEmailJS()) {
+                alert('Email service is not available. Please try again later or contact us directly.');
+                return;
+            }
+            
             const name = document.getElementById('name').value;
             const email = document.getElementById('email').value;
             const phone = document.getElementById('phone').value;
@@ -416,22 +607,39 @@
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Send email using EmailJS
-            const templateParams = {
+            // Send notification email to you (the site owner)
+            const ownerTemplateParams = {
                 from_name: name,
                 from_email: email,
-                phone_number: phone,
-                message: `New contact form submission:
-                
-Name: ${name}
-Email: ${email}
-Phone: ${phone}
-Submitted: ${new Date().toLocaleString()}`
+                phone_number: phone || 'Not provided',
+                submission_date: new Date().toLocaleString(),
+                to_email: 'terryroswell@yahoo.com' // Replace with your email
             };
 
-            emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+            // Send welcome email with documents to the user
+            const userTemplateParams = {
+                to_name: name,
+                to_email: email,
+                from_name: 'Terry and Jenny', // Replace with your actual business name
+                submission_date: new Date().toLocaleString(),
+                // Replace these URLs with your actual GitHub document URLs
+                document_links: 
+                `<p><strong>📄 <a href="https://github.com/troswell/land-photo-gallery/raw/main/documents/Certificate_of_Title.pdf" style="color: #0066cc; text-decoration: none;">Download PDF Guide</a></strong></p>`
+            };
+
+            console.log('Sending notification email...');
+
+            // First, send notification email to you
+            emailjs.send('service_tlscaul', 'template_li7bedi', ownerTemplateParams)
                 .then(function(response) {
-                    console.log('Email sent successfully:', response);
+                    console.log('✅ Notification email sent:', response);
+                    
+                    // Then send welcome email with documents to user
+                    console.log('Sending welcome email with documents...');
+                    return emailjs.send('service_tlscaul', 'template_5b8vifs', userTemplateParams);
+                })
+                .then(function(response) {
+                    console.log('✅ Welcome email sent to user:', response);
                     
                     // Show success message and hide form
                     document.getElementById('contactForm').style.display = 'none';
