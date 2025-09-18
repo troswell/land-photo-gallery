@@ -604,20 +604,40 @@
             submitBtn.textContent = 'Sending...';
             submitBtn.disabled = true;
 
-            // Prepare email parameters
-            const templateParams = {
+            // Send notification email to you (the site owner)
+            const ownerTemplateParams = {
                 from_name: name,
                 from_email: email,
                 phone_number: phone || 'Not provided',
                 submission_date: new Date().toLocaleString(),
                 to_email: 'terryroswell@yahoo.com' // Replace with your email
-                
             };
 
-            // Send email using EmailJS
-            emailjs.send('service_tlscaul', 'template_5b8vifs', templateParams)
+            // Send welcome email with documents to the user
+            const userTemplateParams = {
+                to_name: name,
+                to_email: email,
+                from_name: 'Terry and Jenny', // Replace with your actual business name
+                submission_date: new Date().toLocaleString(),
+                // Replace these URLs with your actual GitHub document URLs
+                document_links: `
+                <p><strong>📄 <a href="https://github.com/troswell/land-photo-gallery/raw/main/documents/Certificate_of_Title.pdf" style="color: #0066cc; text-decoration: none;">Download PDF Guide</a></strong></p>
+                `
+            };
+
+            console.log('Sending notification email...');
+
+            // First, send notification email to you
+            emailjs.send('service_tlscaul', 'template_li7bedi', ownerTemplateParams)
                 .then(function(response) {
-                    console.log('Email sent successfully:', response);
+                    console.log('✅ Notification email sent:', response);
+                    
+                    // Then send welcome email with documents to user
+                    console.log('Sending welcome email with documents...');
+                    return emailjs.send('service_tlscaul', 'template_5b8vifs', userTemplateParams);
+                })
+                .then(function(response) {
+                    console.log('✅ Welcome email sent to user:', response);
                     
                     // Show success message and hide form
                     document.getElementById('contactForm').style.display = 'none';
